@@ -42,6 +42,7 @@ class AWQSearcher:
         w_scaled = w * scale.view(1, -1)
 
         # Psuedo-Quantization (W4A16 시뮬레이션)
+        # 실제로는 압축하지 않았는데, 만약 압축하면 데이터가 얼마나 망가질지를 측정하는 부분
         max_val = w_scaled.abs().amax(dim=1, keepdim=True) # 각 행별로, 절댓값이 가장 큰 값을 찾는 과정 (양자화 범위 결정 목적)
         quant_scale = max_val / (2**(bit-1) - 1) # step-size 계산
         
