@@ -4,6 +4,9 @@ import numpy as np
 from searcher import AWQSearcher
 
 class LyapunovAWQEnv(gym.Env):
+    """
+    RL Agent 가 각 레이어의 상태를 보고 최적의 alpha 값을 선택하게 하는 Env 클래스
+    """
     def __init__(self, model_layers, calib_data, target_mse=0.01, V=10.0):
         self.layers = model_layers
         self.calib_data = calib_data
@@ -48,4 +51,4 @@ class LyapunovAWQEnv(gym.Env):
     
 
     def _get_state(self, layer_idx, Z):
-        return np.array([layer_idx, 0.5, 1.0, Z], dtype=np.float32)
+        return np.array([layer_idx, 0.5, 1.0, Z], dtype=np.float32) # 0.5, 1.0 은 실제 데이터로 대체되어야함
