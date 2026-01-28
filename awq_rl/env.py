@@ -2,6 +2,7 @@ import gymnasium as gym
 import numpy as np
 
 from searcher import AWQSearcher
+from feature import ActivationStats
 
 class LyapunovAWQEnv(gym.Env):
     """
@@ -23,7 +24,10 @@ class LyapunovAWQEnv(gym.Env):
         # continuous / discrete 값 모두 처리할 수 있음
         # 여기에서는, 일단 간단 구현 목적으로 Discrete 하게 보기로
         self.action_space = gym.spaces.Discrete(21) # 0.05 step
-        self.observation_space = gym.spaces.Box(low=0, high=100, shape=(4,), dtype=np.float32)
+        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(7,), dtype=np.float32)
+
+        # Feature Extractor
+        self.hook_manager = ActivationStats()        
     
     def step(self, action_idx):
         alpha = action_idx * 0.05
@@ -31,7 +35,18 @@ class LyapunovAWQEnv(gym.Env):
         layer = self.layers[self.current_layer_index]
         x = self.calib_data[0]
 
+        # hook 등록 (현 레이어 feature 확인)
+        handle = self.hook_manager.register(layer)
+
+        # Forward Pass
         mse = self.searcher.quantization_error(layer, x, alpha)
+
+        # layer 통계량
+        layer_stats = self.hook_manager.current_input_stats.numpy()
+
+        # Hook 해제
+        handle.remove()
+        self.hook_manager.hooks = []
 
         # Lyapunov Queue 업데이트
         prev_Z = self.Z
