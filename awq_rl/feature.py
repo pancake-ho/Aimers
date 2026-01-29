@@ -1,8 +1,6 @@
 import torch
 import torch.nn as nn
 
-from torch import register_for
-
 class ActivationStats:
     """
     AWQ 의 핵심 term 인, activation 분포를 관찰하는 클래스
