@@ -1,6 +1,7 @@
 import json
 import torch
 import time
+from datetime import datetime
 from awq import AutoAWQForCausalLM
 from transformers import AutoTokenizer
 
@@ -73,9 +74,10 @@ def run_quantization():
     """
     load_alphas()
 
-    quant_time = time.time()
-    model_path = f"LGAI-EXAONE/EXAONE-4.0-1.2B-{quant_time}ver"
-    quant_path = f"EXAONE-1.2B-RL-AWQ-4bit-{quant_time}ver"
+    current_time = datetime.now().strftime("%Y%n%d_%H%M")
+    model_path = f"LGAI-EXAONE/EXAONE-4.0-1.2B"
+
+    quant_path = f"EXAONE-1.2B-RL-AWQ-4bit-{current_time}"
     quant_config = { "zero_point": True, "q_group_size": 128, "w_bit": 4, "version": "GEMM" }
 
     print("양자화 실행을 위한 모델 로딩을 수행합니다.")
