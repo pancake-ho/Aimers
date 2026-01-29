@@ -7,10 +7,21 @@ from feature import ActivationStats
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"사용 장치: {device}")
 
-# 모델 로드
+# 모델 설정
 model_id = "LGAI-EXAONE/EXAONE-4.0-1.2B"
 print(f"모델 로드 중이며, 모델명은 다음과 같습니다: {model_id}")
-model = AutoModelForCausalLM.from_pretrained(model_id, dtype=torch.float16, trust_remote_code=True)
+
+# dtype 설정
+# CUDA 라면, FP16 사용하고 / CPU 라면, FP32 사용
+dtype = torch.float16 if device == "cuda" else torch.float32
+
+# 모델 및 tokenizer 로드
+model = AutoModelForCausalLM.from_pretrained(
+    model_id, 
+    dtype=dtype, 
+    trust_remote_code=True
+    ).to(device)
+
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 # Hook 준비
@@ -25,7 +36,7 @@ hook_manager.register(target_layer)
 
 # Dummy Input Data 를 이용해서, 임시 테스트 진행
 text = "EXAONE is a powerful language model."
-inputs = tokenizer(text, return_tensors="pt")
+inputs = tokenizer(text, return_tensors="pt").to(device)
 
 print("레이어 별 activation 탐색을 진행합니다.")
 with torch.no_grad():
