@@ -59,10 +59,9 @@ def extract_alpha():
             break
 
     # 파일 저장
-    saved = "best_alphas.json"
-    with open(saved, "w") as f:
+    with open("best_alphas.json", "w") as f:
         json.dump(best_alphas, f, indent=4)
-    print(f"{saved} 파일에 최적의 alpha 값들 저장을 완료했습니다.")
+    print("best_alphas.json 파일에 최적의 alpha 값들 저장을 완료했습니다.")
 
 if __name__ == "__main__":
     extract_alpha()
