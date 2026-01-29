@@ -42,7 +42,7 @@ class LyapunovAWQEnv(gym.Env):
         mse = self.searcher.quantization_error(layer, x, alpha)
 
         # layer 통계량
-        layer_stats = self.hook_manager.current_input_stats.numpy()
+        # layer_stats = self.hook_manager.current_input_stats.numpy()
 
         # Hook 해제
         handle.remove()

@@ -37,7 +37,7 @@ class ActivationStats:
         third_moment = torch.mean(centered ** 3)
         skewness = third_moment / (std ** 3)
 
-        return torch.tensor([mean, std, kurtosis, skewness, max_val])
+        return torch.tensor([mean.item(), std.item(), kurtosis.item(), skewness.item(), max_val.item()])
 
     def hook_fn(self, module, input, output):
         """
