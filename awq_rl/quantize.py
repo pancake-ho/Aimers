@@ -8,20 +8,20 @@ from transformers import AutoTokenizer
 # AutoAWQ 의 Scale 검색 함수를 RL Agent 가 뽑아낸 RL Alpha 값으로 덮어쓸거임 (monkey patch)
 from awq.quantize.quantizer import AwqQuantizer
 
-# alpha 를 저장할 전역 변수 선언
-RL_ALPHAS = {}
+# config (alpha, group size) 를 저장할 전역 변수 선언
+RL_CONFIGS = {}
 
-def load_alphas():
+def load_configs():
     """
-    RL Agent Inference 과정으로 구한 최적의 alpha 값들을 로드하는 함수
+    RL Agent Inference 과정으로 구한 최적의 config 값들을 로드하는 함수
     """
-    global RL_ALPHAS
+    global RL_CONFIGS
     try:
-        with open("best_alphas.json", "r") as f:
-            RL_ALPHAS = json.load(f)
-        print(f"{len(RL_ALPHAS)} 길이의 RL Alpha 값들을 로드 완료했습니다.")
+        with open("best_configs.json", "r") as f:
+            RL_CONFIGS = json.load(f)
+        print("RL Config 파일을 로드 완료했습니다.")
     except Exception as e:
-        print("best_alphas.json 파일을 찾을 수 없습니다.")
+        print("best_configs.json 파일을 찾을 수 없습니다.")
         print("구체적인 에러 원인은 다음을 참고하세요: {e}")
         exit(1)
 
@@ -44,8 +44,11 @@ def rl_search_best_scale(self, module, name, input_feat):
         
         # RL Inference 로 구한 alpha 조회
         key = f"model.layers.{layer_idx}"
-        if layer_idx != -1 and key in RL_ALPHAS:
-            best_alpha = RL_ALPHAS[key]
+        best_alpha = 1.0
+
+        if layer_idx != -1 and key in RL_CONFIGS:
+            config = RL_CONFIGS[key]
+            best_alpha = config["alpha"]
             print(f"{name} 레이어에 대하여 {best_alpha} 값의 RL alpha 를 사용합니다.")
     
     except Exception as e:
@@ -72,12 +75,12 @@ def run_quantization():
     """
     최종 양자화 수행 함수
     """
-    load_alphas()
+    load_configs()
 
     current_time = datetime.now().strftime("%Y%n%d_%H%M")
     model_path = f"LGAI-EXAONE/EXAONE-4.0-1.2B"
 
-    quant_path = f"EXAONE-1.2B-RL-AWQ-4bit-{current_time}"
+    quant_path = f"EXAONE-1.2B-RL-AWQ-mixed-{current_time}"
     quant_config = { "zero_point": True, "q_group_size": 128, "w_bit": 4, "version": "GEMM" }
 
     print("양자화 실행을 위한 모델 로딩을 수행합니다.")

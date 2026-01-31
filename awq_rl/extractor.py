@@ -28,7 +28,7 @@ def extract_alpha():
     target_layers = model.model.layers
 
     # env 및 agent 로드
-    env = LyapunovAWQEnv(target_layers, layer_inputs, target_mse=0.005, V=0.5)
+    env = LyapunovAWQEnv(target_layers, layer_inputs, target_cost=1.3, V=0.5)
     
     print("훈련된 PPO Agent 를 로드합니다.")
     try:
@@ -39,19 +39,29 @@ def extract_alpha():
         return
     
     # 최적의 alpha 값 추출
-    print("\n--- 최적의 alpha 값 추출을 진행합니다 ---")
+    print("\n--- 최적의 alpha 및 group size 값 추출을 진행합니다 ---")
     obs, _ = env.reset()
-    best_alphas = {}
+    best_configs = {}
 
     for i in range(len(target_layers)):
         # 가장 확률이 높은 행동 선택
         action, _ = model.predict(obs, deterministic=True)
-        alpha_value = float(action[0] * 0.05)
+
+        # Action 해석 (decoding)
+        if action < 20:
+            group_size = 128
+            alpha = float(action * 0.05)
+        else:
+            group_size = 64
+            alpha = float((action - 20) * 0.05)
 
         layer_name = f"model.layers.{i}" # 실제 EXAONE 레이어 이름을 따름
-        best_alphas[layer_name] = alpha_value
+        best_configs[layer_name] = {
+            "alpha": alpha,
+            "group_size": group_size,
+        }
         
-        print(f"[Layer {i}] 선택된 alpha 값: {alpha_value:.3f}")
+        print(f"[Layer {i}] 선택된 alpha 값: {alpha:.3f}, 선택된 group size 값: {group_size}")
 
         # env step
         obs, rewards, dones, truncated, info = env.step(action)
@@ -59,9 +69,9 @@ def extract_alpha():
             break
 
     # 파일 저장
-    with open("best_alphas.json", "w") as f:
-        json.dump(best_alphas, f, indent=4)
-    print("best_alphas.json 파일에 최적의 alpha 값들 저장을 완료했습니다.")
+    with open("best_configs.json", "w") as f:
+        json.dump(best_configs, f, indent=4)
+    print("best_configs.json 파일에 최적의 alpha 값들 저장을 완료했습니다.")
 
 if __name__ == "__main__":
     extract_alpha()
