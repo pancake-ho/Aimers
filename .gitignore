@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 aimers/
+hackathon/
 .env
 
 # 연구 데이터 (용량 큰 것들)
