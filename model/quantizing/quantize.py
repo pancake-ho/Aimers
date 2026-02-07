@@ -1,11 +1,11 @@
 from auto_round import AutoRound
 
 class AutoRoundquantize():
-    def __init__(self, model, tokenizer, calib_data, seq_length=2048, 
+    def __init__(self, model, tokenizer, calib_dataset, seq_length=2048, 
                  bits=4, group_size=128, sym=False, iters=500, lr=1e-2):
         self.model = model
         self.tokenizer = tokenizer
-        self.calib_data = calib_data
+        self.calib_data = calib_dataset
         self.seq_length = seq_length
         
         # 양자화 하이퍼파라미터 저장
@@ -62,4 +62,4 @@ class AutoRoundquantize():
         )
         autoround.quantize()
         
-        return self.model
+        return autoround

@@ -2,6 +2,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training, TaskType
 from trl import SFTTrainer
+import gc
 
 class Fine_tuning():
     """
@@ -9,10 +10,10 @@ class Fine_tuning():
     """
     def __init__(self, 
                  flag: bool=True, 
-                 model: str="LGAI-EXAONE/EXAONE-4.0-1.2B", 
-                 tokenizer: str="none", 
+                 model=None,
+                 tokenizer=None,
                  seq_length: int=2048,
-                 train_ds: str="none"):
+                 train_ds=None):
         self.flag = flag # fine-tuning 사용 여부 (기본값은 true)
         self.model = model
         self.tokenizer = tokenizer
@@ -51,7 +52,8 @@ class Fine_tuning():
                 logging_steps=10,
                 bf16=True,
                 optim="adamw_torch",
-                save_strategy="no"
+                save_strategy="no",
+                gradient_checkpointing=True,
             )
 
             def formatting_prompts_func(example):
@@ -72,7 +74,19 @@ class Fine_tuning():
             )
 
             trainer.train()
-            print("[Step 1] LoRA Fine-Tuning 시작")
+            print("[Step 1] 학습 완료, 병합 중...")
             # 학습된 어댑터를 원본 모델에 영구 병합 (AutoRound를 위해 필수)
-            model = trainer.model.merge_and_unload()
+
+            self.model = trainer.model.merge_and_unload()
+
+            # 메모리 정리
+            del trainer
+            torch.cuda.empty_cache()
+            gc.collect()
+
             print("[Step 1] 병합 완료. 이제 모델은 Fine-tuned 상태입니다.")
+            return self.model
+
+        else:
+            print("[Step 1] Fine-Tuning 단계 스킵")
+            return self.model

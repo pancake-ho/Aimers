@@ -11,14 +11,8 @@ class ModelConfig:
 class TuningConfig:
     USE_FINE_TUNING = True
     TRAINING_SAMPLES = 1000
-    TRAINING_EPOCHS = 1
-    LEARNING_RATE = 2e-5
-    FLAG = True
 
 @dataclass
 class QuantizationConfig:
     NUM_CALIBRATION_SAMPLES=512
     MAX_SEQUENCE_LENGTH = 2048
-    BITS = 4
-    GROUP_SIZE = 128
-    SYMMETRIC = True
