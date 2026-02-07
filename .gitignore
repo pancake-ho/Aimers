@@ -24,3 +24,4 @@ logs/
 practice/
 early_exit/
 model/model/
+awq_rl/
