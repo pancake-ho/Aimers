@@ -35,7 +35,8 @@ Aimers/
 ## ⚙️ Requirements
 
 
-이 프로젝트는 Python 3.10.12 환경에서 테스트되었습니다. 실행 전 아래 라이브러리들을 설치해주세요.
+이 프로젝트는 Python 3.10.12 환경에서 테스트되었습니다. 
+실행 전 아래 라이브러리들을 설치해주세요.
 (권장: requirements.txt 파일을 생성하여 pip install -r requirements.txt로 관리하는 것이 좋습니다.)
 
 ```bash
@@ -45,8 +46,8 @@ pip install torch transformers datasets peft trl auto-round auto-gptq
 ## 🚀 Usage
 
 
-전체 파이프라인(Fine-tuning → Merge → Quantization → Save)은 main.py를 통해 한 번에 실행됩니다.
-실행이 완료되면 model/ 디렉토리에 양자화된 모델 파일과 제출용 submit.zip 파일이 생성됩니다.
+전체 파이프라인은 main.py를 통해 한 번에 실행됩니다.
+실행이 완료되면 model/ 디렉토리에 양자화된 모델 파일과 제출용 zip 파일이 생성됩니다.
 
 ```bash
 (레포지토리 클론)
@@ -61,14 +62,16 @@ python model/main.py
 
 
 **1. Fine-tuning Stage**
+
 Method: LoRA (Low-Rank Adaptation)
 
 Library: peft, trl
 
-Details: q_proj, k_proj, v_proj 등 주요 모듈에 어댑터를 부착하여 소규모 데이터로 빠르게 학습한 뒤, 원본 모델에 Merge합니다.
+Details: q_proj, k_proj, v_proj 등 모듈에 어댑터를 부착하여 소규모 데이터로 빠르게 학습한 뒤, 원본 모델에 Merge합니다.
 
 
 **2. Quantization Stage**
+
 Method: AutoRound (Advanced Weight-Rounding)
 
 Bits: 4-bit
