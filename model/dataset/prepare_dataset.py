@@ -6,6 +6,9 @@ def prepare_dataset(ds_id, ds_split, num_train, num_calib):
     """
     ds = load_dataset(ds_id, split=ds_split)
 
+    # 260208 수정 - 데이터 섞기 추가 및 seed 고정
+    ds = ds.shuffle(seed=42)
+
     # 학습용과 캘리브레이션용 분리
     training_dataset = ds.select(range(num_train))
     calib_dataset = ds.select(range(num_train, num_train + num_calib))
