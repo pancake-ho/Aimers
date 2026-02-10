@@ -2,7 +2,7 @@
 
 
 본 리포지토리는 LG AI Research의 **EXAONE 4.0 1.2B** 모델을 경량화하기 위해, AutoRound 방식을 사용한 프로젝트입니다.  
-**AutoRound** 알고리즘을 기반으로 **LoRA Fine-tuning**을 결합하여, 모델의 성능 저하를 최소화하면서 압축률을 극대화하는 파이프라인을 구축하였습니다.
+**AutoRound** 알고리즘을 기반으로 **LoRA Fine-tuning**을 결합하여, 모델의 성능 저하를 최소화하면서 압축률을 극대화하는 파이프라인을 구축하였습니다..
 
 
 ## 📌 Project Overview
