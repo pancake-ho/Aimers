@@ -1,3 +1,4 @@
+import argparse
 from config import ModelConfig, QuantizationConfig, TuningConfig, load_model
 from dataset import prepare_dataset
 from tuning import Fine_tuning
@@ -5,15 +6,22 @@ from quantizing import AutoRoundquantize
 from utils import save
 
 def main():
+    p = argparse.ArgumentParser()
+    p.add_argument("--num_train", type=int, default=1000, help="Tuning 에 train 데이터 몇 개 쓸건지")
+    p.add_argument("--tuning", type=str, required=True, help="Tuning 과정을 거칠 건지")
+    p.add_argument("--num_calib", type=int, default=512, help="양자화 과정에서 calib 데이터 얼마나 쓸 건지")
+
+    args = p.parse_args()
+
     model_id = ModelConfig.MODEL_ID
     dataset_id = ModelConfig.DATASET_ID
     out_dir = ModelConfig.OUT_DIR
     dataset_split = ModelConfig.DATASET_SPLIT
 
-    num_training_samples = TuningConfig.TRAINING_SAMPLES
-    tuning_flag = TuningConfig.USE_FINE_TUNING
+    num_training_samples = args.num_train
+    tuning_flag = args.tuning
 
-    num_calib_samples = QuantizationConfig.NUM_CALIBRATION_SAMPLES
+    num_calib_samples = args.num_calib
     seq_length = QuantizationConfig.MAX_SEQUENCE_LENGTH
 
     print("1. Pipeline 초기화 중...")

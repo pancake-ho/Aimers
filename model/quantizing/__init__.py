@@ -1,1 +1,1 @@
-from quantize import AutoRoundquantize
+from .quantize import AutoRoundquantize

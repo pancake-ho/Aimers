@@ -1,3 +1,4 @@
+import datasets
 from datasets import load_dataset
 
 def prepare_dataset(ds_id, ds_split, num_train, num_calib):

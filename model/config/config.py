@@ -1,5 +1,9 @@
 from dataclasses import dataclass
 
+"""
+확인용 로그도 담겨있음 (이거 참고하기)
+"""
+
 @dataclass
 class ModelConfig:
     MODEL_ID = "LGAI-EXAONE/EXAONE-4.0-1.2B"
@@ -14,5 +18,5 @@ class TuningConfig:
 
 @dataclass
 class QuantizationConfig:
-    NUM_CALIBRATION_SAMPLES=512
+    NUM_CALIBRATION_SAMPLES = 512
     MAX_SEQUENCE_LENGTH = 2048
