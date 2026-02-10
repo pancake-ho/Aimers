@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 aimers/
+hackathon/
+awq_rl/
 .env
 
 # 연구 데이터 (용량 큰 것들)
@@ -10,7 +12,16 @@ aimers/
 *.yuv
 *.pth
 *.pt
+*.pdf
+*.zip
+*.json
+*.yaml
+*.txt
+*.safetensors
+*.jinja
 data/
 logs/
 practice/
 early_exit/
+model/model/
+awq_rl/
