@@ -1,0 +1,26 @@
+#!/usr/bin/bash
+
+#SBATCH -J aimers_final
+#SBATCH --gres=gpu:1
+#SBATCH --cpus-per-gpu=8
+#SBATCH --mem-per-gpu=29G
+#SBATCH -p batch_eebme_ugrad
+#SBATCH -w moana-y6
+#SBATCH -t 1-0
+#SBATCH -o logs/slurm-%A.out
+
+# -------------------------------------------------------
+
+# 1. 환경 활성화
+source /data/$USER/anaconda3/etc/profile.d/conda.sh
+conda activate aimers
+
+# 2. [수정] 프로젝트 폴더로 이동
+# 현재 위치가 /data/mgga315/repos/aimers 라고 가정할 때, 
+# 그 안에 생성된 Aimers 폴더로 들어갑니다.
+cd /data/$USER/repos/aimers/Aimers
+
+# 3. [수정] 실행 파일 변경 (run2.py -> main.py)
+python main.py
+
+exit 0
