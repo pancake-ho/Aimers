@@ -15,12 +15,10 @@
 source /data/$USER/anaconda3/etc/profile.d/conda.sh
 conda activate aimers
 
-# 2. [수정] 프로젝트 폴더로 이동
-# 현재 위치가 /data/mgga315/repos/aimers 라고 가정할 때, 
-# 그 안에 생성된 Aimers 폴더로 들어갑니다.
-cd /data/$USER/repos/aimers/Aimers
+# 2. 프로젝트 폴더로 이동
+cd /data/$USER/repos/aimers/Aimers/model
 
-# 3. [수정] 실행 파일 변경 (run2.py -> main.py)
-python main.py
+# 3. 실행
+python main.py --tuning True
 
 exit 0
