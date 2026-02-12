@@ -8,7 +8,6 @@ from utils import save
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--num_train", type=int, default=1000, help="Tuning 에 train 데이터 몇 개 쓸건지")
-    p.add_argument("--tuning", type=bool, required=True, help="Tuning 과정을 거칠 건지")
     p.add_argument("--quant", type=str, choices=['awq', 'autoround'], default='autoround', help="어떤 양자화 방법을 사용할 건지")
     p.add_argument("--num_calib", type=int, default=512, help="양자화 과정에서 calib 데이터 얼마나 쓸 건지")
     
@@ -20,7 +19,6 @@ def main():
     dataset_split = ModelConfig.DATASET_SPLIT
 
     num_training_samples = args.num_train
-    tuning_flag = args.tuning
 
     quant_method = args.quant
     num_calib_samples = args.num_calib
@@ -35,7 +33,7 @@ def main():
     train_ds, calib_ds = prepare_dataset(dataset_id, dataset_split, num_training_samples, num_calib_samples)
     print("4. 데이터 준비 완료")
 
-    tuner = Fine_tuning(flag=tuning_flag, model=model, tokenizer=tokenizer, seq_length=seq_length, train_ds=train_ds)
+    tuner = Fine_tuning(model=model, tokenizer=tokenizer, seq_length=seq_length, train_ds=train_ds)
     model = tuner.setup_lora()
 
     # 다양한 양자화 설정에 대비
