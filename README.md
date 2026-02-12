@@ -2,7 +2,7 @@
 
 
 본 리포지토리는 LG AI Research의 **EXAONE 4.0 1.2B** 모델을 경량화하기 위해, AutoRound 방식을 사용한 프로젝트입니다.  
-**AutoRound** 알고리즘을 기반으로 **LoRA Fine-tuning**을 결합하여, 모델의 성능 저하를 최소화하면서 압축률을 극대화하는 파이프라인을 구축하였습니다.
+**AutoRound** 알고리즘을 기반으로 **LoRA Fine-tuning**을 결합하여, 모델의 성능 저하를 최소화하면서 압축률을 극대화하는 파이프라인을 구축하였습니다..
 
 
 ## 📌 Project Overview
@@ -46,16 +46,16 @@ pip install torch transformers datasets peft trl auto-round auto-gptq
 ## 🚀 Usage
 
 
-전체 파이프라인은 main.py를 통해 한 번에 실행됩니다.
+전체 파이프라인은 main.py를 통해 한 번에 실행됩니다. (우분투)
 실행이 완료되면 model/ 디렉토리에 양자화된 모델 파일과 제출용 zip 파일이 생성됩니다.
 
 ```bash
 (레포지토리 클론)
 git clone [https://github.com/pancake-ho/Aimers.git](https://github.com/pancake-ho/Aimers.git)
-cd Aimers
+cd Aimers/model
 
 (파이프라인 실행)
-python model/main.py
+python3 main.py --num_train (숫자) --tuning (True or False) --num_calib (숫자)
 ```
 
 ## 🧪 Methodology Details
