@@ -1,4 +1,5 @@
 import argparse
+import sys
 from config import ModelConfig, QuantizationConfig, TuningConfig, load_model
 from dataset import prepare_dataset
 from tuning import Fine_tuning
@@ -37,10 +38,11 @@ def main():
     model = tuner.setup_lora()
 
     # 다양한 양자화 설정에 대비
-    if quant_method == "awq":
-        quantizer = AWQquantize(model=model, tokenizer=tokenizer, calib_dataset=calib_ds)
-    else:
+    if quant_method == "autoround":
         quantizer = AutoRoundquantize(model=model, tokenizer=tokenizer, calib_dataset=calib_ds)
+    else:
+        print("현재 AWQ 양자화 방식은 사용 불가합니다. autoround 방식을 사용하세요.")
+        sys.exit(1)
 
     autoround_wrapper = quantizer.execute()
     print("5. 양자화 완료")
