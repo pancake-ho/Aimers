@@ -65,5 +65,47 @@ class AutoRoundquantize():
         return autoround
     
 
-# class AWQquantize():
-#     def __init__(self, )
+class AWQWrapper:
+    """
+    AutoAWQ 모델을 /utils 의 save 인터페이스와 호환되도록 감싸는 클래스
+    """
+    def __init__(self, model):
+        self.model = model
+
+    def save_quantized(self, out_dir, format=None, inplace=True):
+        # utils.save 함수는 "auto_gptq" 사용하지만 AWQ 는 이와 다르므로 무시하게 함
+        print(f"[AWQ] AWQ 포맷으로 모델 저장 중... (out_dir: {out_dir})")
+        self.model.save_quantized(out_dir, safetensors=True)
+
+
+class AWQquantize():
+    def __init__(self, model, tokenizer, calib_dataset, seq_length=2048,
+                 bits=4, group_size=128, version="GEMM"):
+        self.model = model
+        self.tokenizer = tokenizer
+        self.calib_data = calib_dataset
+        self.seq_length = seq_length
+
+        # AWQ 포맷
+        self.quant_config = {
+            "zero_point": True,
+            "q_group_size": group_size,
+            "w_bits": bits,
+            "version": version
+        }
+
+    def execute(self):
+        print("[AWQ] 캘리브레이션 데이터 변환 중...")
+
+        # AWQ 는 list of strings 데이터 선호
+        calib_texts = []
+        for example in self.calib_data:
+            text = self.tokenizer.apply_chat_template(
+                example["conversations"],
+                tokenize=False,
+                add_generation_prompt=False,
+            )
+            calib_texts.append(text)
+        
+        print("[AWQ] 모델 로드 준비 중 (메모리 모델 -> AutoAWQ 로딩)")
+        
