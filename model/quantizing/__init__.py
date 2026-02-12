@@ -1,1 +1,1 @@
-from .quantize import AutoRoundquantize, AWQquantize
+from .quantize import AutoRoundquantize
