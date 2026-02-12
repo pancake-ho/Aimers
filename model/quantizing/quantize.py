@@ -1,7 +1,16 @@
 import os
 import shutil
+import torch
 from auto_round import AutoRound
-from awq import AutoAWQForCausalLM
+
+# awq 대체 라이브러리
+from compressed_tensors import (
+    QuantizationConfig,
+    QuantizationStatus,
+    ModelCompressor,
+    CompressionFormat
+)
+
 
 class AutoRoundquantize():
     def __init__(self, model, tokenizer, calib_dataset, seq_length=2048, 
@@ -53,8 +62,8 @@ class AutoRoundquantize():
             group_size=self.group_size,
             sym=self.sym,
             dataset=dataset_list,
-            seq_len=self.seq_length,
-            n_samples=len(dataset_list), # 실제 데이터 개수만큼 사용
+            seqlen=self.seq_length,
+            nsamples=len(dataset_list), # 실제 데이터 개수만큼 사용
             iters=self.iters,
             lr=self.lr,
             minmax_lr=self.lr,
@@ -68,17 +77,17 @@ class AutoRoundquantize():
         return autoround
     
 
-class AWQWrapper:
+class CompressedTensorWrapper:
     """
-    AutoAWQ 모델을 /utils 의 save 인터페이스와 호환되도록 감싸는 클래스
+    CompressedTensor (유사 AWQ) 모델을 /utils 의 save 인터페이스와 호환되도록 감싸는 클래스
     """
     def __init__(self, model):
         self.model = model
 
     def save_quantized(self, out_dir, format=None, inplace=True):
         # utils.save 함수는 "auto_gptq" 사용하지만 AWQ 는 이와 다르므로 무시하게 함
-        print(f"[AWQ] AWQ 포맷으로 모델 저장 중... (out_dir: {out_dir})")
-        self.model.save_quantized(out_dir, safetensors=True)
+        print(f"[Compressed-Tensors(AWQ)] 모델 저장 중... (out_dir: {out_dir})")
+        self.model.save_pretrained(out_dir)
 
 
 class AWQquantize():
@@ -88,55 +97,40 @@ class AWQquantize():
         self.tokenizer = tokenizer
         self.calib_data = calib_dataset
         self.seq_length = seq_length
-
-        # AWQ 포맷
-        self.quant_config = {
-            "zero_point": True,
-            "q_group_size": group_size,
-            "w_bit": bits,
-            "version": version
-        }
+        self.bits = bits
+        self.group_size = group_size
 
     def execute(self):
-        print("[AWQ] 캘리브레이션 데이터 변환 중...")
+        print("[Compressed-Tensors] AWQ 스타일 양자화 설정 적용 중...")
 
-        # AWQ 는 list of strings 데이터 선호
-        calib_texts = []
-        for example in self.calib_data:
-            text = self.tokenizer.apply_chat_template(
-                example["conversations"],
-                tokenize=False,
-                add_generation_prompt=False,
-            )
-            calib_texts.append(text)
-        
-        print("[AWQ] 모델 로드 준비 중 (메모리 모델 -> AutoAWQ 로딩)")
+        # Quantization Config 생성
+        # int4, group size 128, asymmetric 적용
+        config = QuantizationConfig(
+            config_groups={
+                "group_0": {
+                    "weights": {
+                        "num_bits": self.bits, # 4비트
+                        "type": "int",
+                        "strategy": "group",
+                        "group_size": self.group_size,
+                        "symmetric": False,
+                        "actorder": False,
+                    },
+                    "targets": ["Linear"] # 모든 linear 레이어에 적용
+                }
+            },
+            quant_method="compressed-tensors",
+            format="pack-quantized",
+            ignore=["lm_head"]
+        )
 
-        # AutoAWQ 를 위해, 모델을 로드할 path 정의
-        tmp_dir = "tmp_awq_model_cache"
-        if os.path.exists(tmp_dir):
-            shutil.rmtree(tmp_dir)
-        
-        self.model.save_pretrained(tmp_dir)
-        self.tokenizer.save_pretrained(tmp_dir)
+        print("[Compressed-Tensors] 양자화 수행 중...")
 
-        try:
-            model_awq = AutoAWQForCausalLM.from_pretrained(
-                tmp_dir,
-                **{"low_cpu_mem_usage": True, "use_cache": False} # 캐시 설정 수정가능 (추론 느려지면 키기)
-            )
+        # 압축은 ModelCompressor 로 수행
+        compressor = ModelCompressor(quantization_config=config)
+        compressed_state_dict = compressor.compress(self.model)
 
-            print(f"[AWQ] 양자화 시작 (Bits: {self.quant_config['w_bit']}, Group Size: {self.quant_config['q_group_size']})")
+        self.model.load_state_dict(compressed_state_dict, strict=False)
 
-            # 양자화 수행
-            model_awq.quantize(
-                self.tokenizer,
-                quant_config=self.quant_config,
-                calib_data=calib_texts
-            )
-
-            return AWQWrapper(model_awq)
-        
-        finally:
-            if os.path.exists(tmp_dir):
-                shutil.rmtree(tmp_dir)
+        print("[Compressed-Tensors] 양자화 완료.")
+        return CompressedTensorWrapper(self.model)
