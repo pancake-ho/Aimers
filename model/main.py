@@ -3,7 +3,7 @@ import sys
 from config import ModelConfig, QuantizationConfig, TuningConfig, load_model
 from dataset import prepare_dataset
 from tuning import Fine_tuning
-from quantizing import AutoRoundquantize, AWQquantize
+from quantizing import AutoRoundquantize
 from utils import save
 
 def main():

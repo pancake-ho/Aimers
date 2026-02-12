@@ -1,22 +1,22 @@
-import os
-import sys
-import shutil
-import torch
+# import os
+# import sys
+# import shutil
+# import torch
 from auto_round import AutoRound
 
-try:
-    # awq 대체 라이브러리
-    from compressed_tensors import (
-        QuantizationConfig,
-        QuantizationStatus,
-        ModelCompressor,
-        CompressionFormat
-    )
+# try:
+#     # awq 대체 라이브러리
+#     from compressed_tensors import (
+#         QuantizationConfig,
+#         QuantizationStatus,
+#         ModelCompressor,
+#         CompressionFormat
+#     )
 
-except ImportError as e:
-    print("compressed_tensors 라이브러리를 불러오지 못했습니다.\n")
-    print("다음 에러를 확인하고, 라이브러리 설치 혹은 타 오류를 확인하세요: {e}")
-    sys.exit(1)
+# except ImportError as e:
+#     print("compressed_tensors 라이브러리를 불러오지 못했습니다.\n")
+#     print("다음 에러를 확인하고, 라이브러리 설치 혹은 타 오류를 확인하세요: {e}")
+#     sys.exit(1)
 
 
 class AutoRoundquantize():
@@ -84,17 +84,17 @@ class AutoRoundquantize():
         return autoround
     
 
-class CompressedTensorWrapper:
-    """
-    CompressedTensor (유사 AWQ) 모델을 /utils 의 save 인터페이스와 호환되도록 감싸는 클래스
-    """
-    def __init__(self, model):
-        self.model = model
+# class CompressedTensorWrapper:
+#     """
+#     CompressedTensor (유사 AWQ) 모델을 /utils 의 save 인터페이스와 호환되도록 감싸는 클래스
+#     """
+#     def __init__(self, model):
+#         self.model = model
 
-    def save_quantized(self, out_dir, format=None, inplace=True):
-        # utils.save 함수는 "auto_gptq" 사용하지만 AWQ 는 이와 다르므로 무시하게 함
-        print(f"[Compressed-Tensors(AWQ)] 모델 저장 중... (out_dir: {out_dir})")
-        self.model.save_pretrained(out_dir)
+#     def save_quantized(self, out_dir, format=None, inplace=True):
+#         # utils.save 함수는 "auto_gptq" 사용하지만 AWQ 는 이와 다르므로 무시하게 함
+#         print(f"[Compressed-Tensors(AWQ)] 모델 저장 중... (out_dir: {out_dir})")
+#         self.model.save_pretrained(out_dir)
 
 
 # 호환성 문제로 인해, 일단은 AWQ 제외
