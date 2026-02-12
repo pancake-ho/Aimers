@@ -19,6 +19,6 @@ conda activate aimers
 cd /data/$USER/repos/aimers/Aimers/model
 
 # 3. 실행
-python main.py --tuning True
+python main.py
 
 exit 0
