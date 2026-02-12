@@ -1,7 +1,7 @@
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
-from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training, TaskType
-from trl import SFTTrainer
+from transformers import TrainingArguments
+from peft import LoraConfig, TaskType
+from trl import SFTTrainer, SFTConfig
 import gc
 
 class Fine_tuning():
@@ -20,7 +20,7 @@ class Fine_tuning():
         self.max_seq_length = seq_length
         self.train_dataset = train_ds
 
-    def setup_lora(self, r: int=16, alpha: int=32, dropout: float=0.05, epochs: int=1, lr: float=2e-5):
+    def setup_lora(self, r: int=16, alpha: int=32, dropout: float=0.05, epochs: int=1, lr: float=2e-4):
         """
         Quantized EXAONE 4.0-1.2B 모델에 대한 Fine-tuning 적용 함수
         """
@@ -35,7 +35,7 @@ class Fine_tuning():
                 lora_alpha=alpha,
                 target_modules=[
                     "q_proj", "k_proj", "v_proj", "o_proj",
-                    "gate_proj", "up_proj", "down_proj"
+                    "gate_proj", "up_proj", "down_proj" # 다 건드림
                 ],
                 lora_dropout=dropout,
                 bias="none",
@@ -43,33 +43,34 @@ class Fine_tuning():
             )
 
             # SFT TRAINER 설정
-            training_args = TrainingArguments(
+            sft_config = SFTConfig(
                 output_dir="./trainer",
-                num_train_epochs=epochs,
-                per_device_train_batch_size=1,
-                gradient_accumulation_steps=4,
+                num_train_epochs=epochs, # 보통 1~3
+                per_device_train_batch_size=4, # OOM 걸리면 줄이기
+                gradient_accumulation_steps=4, # OOM 걸리면 줄이기
                 learning_rate=lr,
                 logging_steps=10,
                 bf16=True,
                 optim="adamw_torch",
                 save_strategy="no",
                 gradient_checkpointing=True,
+                max_length=self.max_seq_length,
             )
 
             def formatting_prompts_func(example):
-                output_texts = []
-                for conversation in example["conversations"]:
-                    text = self.tokenizer.apply_chat_template(conversation, tokenize=False, add_generation_prompt=False)
-                    output_texts.append(text)
-                return output_texts
+                text = self.tokenizer.apply_chat_template(
+                    example["conversations"],
+                    tokenize=False,
+                    add_generation_prompt=False
+                )
+                return text
             
             trainer = SFTTrainer(
                 model=self.model,
                 train_dataset=self.train_dataset,
                 peft_config=peft_config,
-                max_seq_length=self.max_seq_length,
-                tokenizer=self.tokenizer,
-                args=training_args,
+                args=sft_config,
+                processing_class=self.tokenizer,
                 formatting_func=formatting_prompts_func
             )
 
