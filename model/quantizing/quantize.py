@@ -1,4 +1,7 @@
+import os
+import shutil
 from auto_round import AutoRound
+from awq import AutoAWQForCausalLM
 
 class AutoRoundquantize():
     def __init__(self, model, tokenizer, calib_dataset, seq_length=2048, 
@@ -90,7 +93,7 @@ class AWQquantize():
         self.quant_config = {
             "zero_point": True,
             "q_group_size": group_size,
-            "w_bits": bits,
+            "w_bit": bits,
             "version": version
         }
 
@@ -108,4 +111,32 @@ class AWQquantize():
             calib_texts.append(text)
         
         print("[AWQ] 모델 로드 준비 중 (메모리 모델 -> AutoAWQ 로딩)")
+
+        # AutoAWQ 를 위해, 모델을 로드할 path 정의
+        tmp_dir = "tmp_awq_model_cache"
+        if os.path.exists(tmp_dir):
+            shutil.rmtree(tmp_dir)
         
+        self.model.save_pretrained(tmp_dir)
+        self.tokenizer.save_pretrained(tmp_dir)
+
+        try:
+            model_awq = AutoAWQForCausalLM.from_pretrained(
+                tmp_dir,
+                **{"low_cpu_mem_usage": True, "use_cache": False} # 캐시 설정 수정가능 (추론 느려지면 키기)
+            )
+
+            print(f"[AWQ] 양자화 시작 (Bits: {self.quant_config['w_bit']}, Group Size: {self.quant_config['q_group_size']})")
+
+            # 양자화 수행
+            model_awq.quantize(
+                self.tokenizer,
+                quant_config=self.quant_config,
+                calib_data=calib_texts
+            )
+
+            return AWQWrapper(model_awq)
+        
+        finally:
+            if os.path.exists(tmp_dir):
+                shutil.rmtree(tmp_dir)
