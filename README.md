@@ -55,7 +55,7 @@ git clone [https://github.com/pancake-ho/Aimers.git](https://github.com/pancake-
 cd Aimers/model
 
 (파이프라인 실행)
-python3 main.py --num_train (숫자) --tuning (True or False) --num_calib (숫자)
+python3 main.py --num_train (숫자) --quant (awq or autoround) --num_calib (숫자)
 ```
 
 ## 🧪 Methodology Details
