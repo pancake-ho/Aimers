@@ -8,7 +8,7 @@ from utils import save
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--num_train", type=int, default=1000, help="Tuning 에 train 데이터 몇 개 쓸건지")
-    p.add_argument("--tuning", type=str, required=True, help="Tuning 과정을 거칠 건지")
+    p.add_argument("--tuning", type=bool, required=True, help="Tuning 과정을 거칠 건지")
     p.add_argument("--num_calib", type=int, default=512, help="양자화 과정에서 calib 데이터 얼마나 쓸 건지")
 
     args = p.parse_args()
