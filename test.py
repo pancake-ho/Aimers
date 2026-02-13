@@ -59,7 +59,6 @@ def test_model():
         model=MODEL_PATH,
         tensor_parallel_size=1,            # 대회 규정: 1
         gpu_memory_utilization=0.85,       # 대회 규정: 0.85
-        max_model_len=2048,                # EXAONE 스펙에 맞게 조정 (대회 max_gen_toks 고려)
         dtype="auto",
         trust_remote_code=True,            # EXAONE 모델 로드 시 필수
         enforce_eager=True                 # 구버전 vLLM에서 CUDA 그래프 에러 방지용 (선택)
@@ -72,25 +71,24 @@ def test_model():
         # 3. 추론 테스트 (Sampling Params 규정 준수)
         # ==========================================
         # 대회 평가용 프롬프트 예시 (가상의 데이터)
+        # apply_chat_template=true 환경 모사를 위해 대화형 프맷 사용
         prompts = [
-            "인공지능의 미래에 대해 설명해줘.",
-            "Python에서 리스트를 정렬하는 방법을 코드로 보여줘.",
-            "LG Aimers 해커톤의 목적은 무엇인가?"
+            [{"role": "user", "content": "인공지능의 미래에 대해 설명해줘."}],
+            [{"role": "user", "content": "Python에서 리스트를 정렬하는 방법을 코드로 보여줘."}],
+            [{"role": "user", "content": "양자화(Quantization) 기술이 모델 경량화에 미치는 영향을 설명해줘."}]
         ]
 
         # Sampling Params (대회 규정에는 명시되지 않았으나, 평가 시 보통 사용되는 값)
         # max_tokens는 대회 규정의 max_gen_toks=16384 내에서 설정
         sampling_params = SamplingParams(
             temperature=0.0,       # 정량 평가를 위해 보통 0으로 설정 (Greedy Decoding)
-            max_tokens=256,        # 테스트용 길이
+            max_tokens=16384,        # 테스트용 길이
             stop=None
         )
 
         print(f"\n>>> 추론 시작 ({len(prompts)} 개 예제)...")
+        outputs = llm.chat(messages=prompts, sampling_params=sampling_params)
         start_time = time.time()
-
-        outputs = llm.generate(prompts, sampling_params)
-
         end_time = time.time()
 
         # ==========================================
@@ -98,10 +96,8 @@ def test_model():
         # ==========================================
         print("\n" + "="*50)
         for output in outputs:
-            prompt = output.prompt
             generated_text = output.outputs[0].text
-            print(f"[질문]: {prompt}")
-            print(f"[답변]: {generated_text}")
+            print(f"[답변 미리보기]: {generated_text.strip()[:200]} ... (이하 생략)")
             print("-" * 50)
 
         print(f">>> 총 소요 시간: {end_time - start_time:.2f}초")
