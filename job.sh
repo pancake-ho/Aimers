@@ -16,9 +16,9 @@ source /data/$USER/anaconda3/etc/profile.d/conda.sh
 conda activate aimers
 
 # 2. 프로젝트 폴더로 이동
-cd /data/$USER/repos/aimers/Aimers/model
+cd /data/$USER/repos/aimers/Aimers
 
 # 3. 실행
-python3 main.py --quant autoround
+python test.py
 
 exit 0
