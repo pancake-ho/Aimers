@@ -5,7 +5,7 @@ def save(out_dir, autoround_wrapper, tokenizer):
     os.makedirs(out_dir, exist_ok=True)
 
     print(f"[Result] GPTQ 포맷으로 저장 중: {out_dir}")
-    autoround_wrapper.save_quantized(output_dir=out_dir, format="auto_round", inplace=True)
+    autoround_wrapper.save_pretrained(output_dir=out_dir, save_compressed=True)
     tokenizer.save_pretrained(out_dir)
 
     zip_name = "submit"

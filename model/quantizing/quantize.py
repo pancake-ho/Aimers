@@ -2,7 +2,7 @@
 # import sys
 # import shutil
 # import torch
-from auto_round import AutoRound
+# from auto_round import AutoRound
 
 # try:
 #     # awq 대체 라이브러리
@@ -18,6 +18,8 @@ from auto_round import AutoRound
 #     print("다음 에러를 확인하고, 라이브러리 설치 혹은 타 오류를 확인하세요: {e}")
 #     sys.exit(1)
 
+from llmcompressor import oneshot
+from llmcompressor.modifiers.autoround import AutoRoundModifier
 
 class AutoRoundquantize():
     def __init__(self, model, tokenizer, calib_dataset, seq_length=2048, 
@@ -62,26 +64,26 @@ class AutoRoundquantize():
 
         print(f"[AutoRound] 양자화 시작 (Bits: {self.bits}, Group: {self.group_size})")
 
-        autoround = AutoRound(
-            model=self.model,
-            tokenizer=self.tokenizer,
-            bits=self.bits,
+        # W4A16 + (보통) G128 구성이 흔함
+        recipe = AutoRoundModifier(
+            targets="Linear",
+            scheme="W4A16",
+            ignore=["lm_head"],
+            iters=self.iters,      # 예: 200 권장(문서)
             group_size=self.group_size,
-            sym=self.sym,
-            dataset=dataset_list,
-            seqlen=self.seq_length,
-            nsamples=len(dataset_list), # 실제 데이터 개수만큼 사용
-            iters=self.iters,
-            lr=self.lr,
-            minmax_lr=self.lr,
-            enable_quanted_input=True,
-            enable_minmax_tuning=True,
-            batch_size=1,
-            gradient_accumulate_steps=8,
+            symmetric=self.sym,
         )
-        autoround.quantize()
         
-        return autoround
+        oneshot(
+            model=self.model,
+            dataset=dataset_list,
+            recipe=recipe,
+            max_seq_length=self.seq_length,
+            num_calibration_samples=len(dataset_list),
+            shuffle_calibration_samples=False,
+        )
+        
+        return self.model
     
 
 # class CompressedTensorWrapper:
