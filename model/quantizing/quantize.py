@@ -66,13 +66,23 @@ class AutoRoundquantize():
 
         # W4A16 + (보통) G128 구성이 흔함
         recipe = AutoRoundModifier(
-            targets="Linear",
-            scheme="W4A16",
-            ignore=["lm_head"],
-            iters=self.iters,      # 예: 200 권장(문서)
-            group_size=self.group_size,
-            symmetric=self.sym,
-        )
+        iters=self.iters,
+        ignore=["lm_head"],
+        config_groups={
+            "group_0": {
+                "targets": ["Linear"],
+                "input_activations": None,
+                "output_activations": None,
+                "weights": {
+                    "num_bits": self.bits,          # 4
+                    "type": "int",
+                    "symmetric": self.sym,          # True/False
+                    "strategy": "group",
+                    "group_size": self.group_size,  # 128
+                },
+            }
+        },
+)
         
         oneshot(
             model=self.model,
