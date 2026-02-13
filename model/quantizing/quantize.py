@@ -58,38 +58,41 @@ class AutoRoundquantize():
     def execute(self):
         print("[AutoRound] 캘리브레이션 데이터 변환 중...")
 
-        calib_ds = self.calib_data.map(self.preprocess_autoround, remove_columns=self.calib_data.column_names)
+        # 1) dataset 전처리 및 torch format 설정
+        calib_ds = self.calib_data.map(
+            self.preprocess_autoround, 
+            remove_columns=self.calib_data.column_names,
+        )
         calib_ds.set_format(type="torch", columns=["input_ids", "attention_mask"])
-        dataset_list = [calib_ds[i] for i in range(len(calib_ds))]
 
         print(f"[AutoRound] 양자화 시작 (Bits: {self.bits}, Group: {self.group_size})")
 
-        # W4A16 + (보통) G128 구성이 흔함
+        # AutoRoundModifier 레시피 정의
         recipe = AutoRoundModifier(
-        iters=self.iters,
-        ignore=["lm_head"],
-        config_groups={
-            "group_0": {
-                "targets": ["Linear"],
-                "input_activations": None,
-                "output_activations": None,
-                "weights": {
-                    "num_bits": self.bits,          # 4
-                    "type": "int",
-                    "symmetric": self.sym,          # True/False
-                    "strategy": "group",
-                    "group_size": self.group_size,  # 128
-                },
-            }
-        },
-)
+            iters=self.iters,
+            ignore=["lm_head"],
+            config_groups={
+                "group_0": {
+                    "targets": ["Linear"],
+                    "input_activations": None,
+                    "output_activations": None,
+                    "weights": {
+                        "num_bits": self.bits,          # 4
+                        "type": "int",
+                        "symmetric": self.sym,          # True/False
+                        "strategy": "group",
+                        "group_size": self.group_size,  # 128
+                    },
+                }
+            },
+    )
         
         oneshot(
             model=self.model,
-            dataset=dataset_list,
+            dataset=calib_ds,
             recipe=recipe,
             max_seq_length=self.seq_length,
-            num_calibration_samples=len(dataset_list),
+            num_calibration_samples=len(calib_ds),
             shuffle_calibration_samples=False,
         )
         
