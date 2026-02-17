@@ -16,7 +16,7 @@ class GPTQquantize():
         self.iters = iters
         self.lr = lr
     
-    def preprocess_autoround(self, example):
+    def preprocess(self, example):
         prompt = self.tokenizer.apply_chat_template(
             example["conversations"],
             add_generation_prompt=True,
@@ -77,4 +77,3 @@ class GPTQquantize():
         )
         
         return self.model
-    

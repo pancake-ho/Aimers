@@ -16,7 +16,8 @@ from llmcompressor import oneshot
 from llmcompressor.modifiers.quantization import GPTQModifier
 
 from dataset import load_dataset, make_calib_dataset
-from tuning import build_kd_features, KDTrainer
+from tuning import build_kd_features, KDTrainer, DataCollatorForCausalLM
+from utils import save
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -95,7 +96,7 @@ def run_kd_if_enabled(args, tokenizer):
         alpha=args.kd_alpha,
         args=targs,
         train_dataset=train_ds,
-        data_collator=default_data_collator,
+        data_collator=DataCollatorForCausalLM(tokenizer, pad_to_multiple_of=8),
     )
 
     trainer.train()
@@ -152,16 +153,6 @@ def run_gptq(args, tokenizer, model_path_for_quant):
     return model
 
 
-def save_artifacts(args, model, tokenizer):
-    os.makedirs(args.out_dir, exist_ok=True)
-    model.save_pretrained(args.out_dir, save_compressed=True)
-    tokenizer.save_pretrained(args.out_dir)
-
-    zip_name = "submit"
-    shutil.make_archive(base_name=zip_name, format="zip", root_dir=".", base_dir=args.out_dir)
-    print(f"[INFO] 생성 완료: {zip_name}.zip (내부에 model/만 있어야 함)")
-
-
 def main():
     args = parse_args()
     tokenizer = AutoTokenizer.from_pretrained(args.base_model, trust_remote_code=True)
@@ -170,7 +161,7 @@ def main():
 
     model_path_for_quant = run_kd_if_enabled(args, tokenizer)
     model = run_gptq(args, tokenizer, model_path_for_quant)
-    save_artifacts(args, model, tokenizer)
+    save(args.out_dir, model, tokenizer)
 
 
 if __name__ == "__main__":

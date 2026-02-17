@@ -18,10 +18,11 @@ class KDTrainer(Trainer):
         self.alpha = alpha
 
     def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
-        labels = input["labels"]
+        labels = inputs["labels"]
         model_inputs = {k: v for k, v in inputs.items() if k != "labels"}
 
         outputs = model(**model_inputs)
+        student_logits = outputs.logits
         with torch.no_grad():
             teacher_logits = self.teacher(**model_inputs).logits
 
@@ -70,7 +71,7 @@ def build_kd_features(tokenizer, example, max_len: int):
     prompt_text = tokenizer.apply_chat_template(
         prompt_msgs + [{"role": "assistant", "content": ""}],
         tokenize=False,
-        add_generation_prompt=False,
+        add_generation_prompt=True,
     )
     full_text = tokenizer.apply_chat_template(
         prompt_msgs + [{"role": "assistant", "content": answer}],
