@@ -15,7 +15,7 @@ from transformers import (
 from llmcompressor import oneshot
 from llmcompressor.modifiers.quantization import GPTQModifier
 
-from dataset import load_dataset, make_calib_dataset
+from dataset import prepare_dataset, make_calib_dataset
 from tuning import build_kd_features, KDTrainer, DataCollatorForCausalLM
 from utils import save
 
