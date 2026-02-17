@@ -1,1 +1,1 @@
-from .prepare_dataset import prepare_dataset
+from .prepare_dataset import prepare_dataset, load_dataset

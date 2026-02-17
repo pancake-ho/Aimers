@@ -19,6 +19,6 @@ conda activate aimers
 cd /data/$USER/repos/aimers/Aimers/model
 
 # 3. 실행
-python3 main.py --quant autoround
+python3 main.py
 
 exit 0
