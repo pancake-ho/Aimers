@@ -28,7 +28,7 @@ class KDTrainer(Trainer):
 
         student_logits = student_logits[:, :-1, :].contiguous()
         teacher_logits = teacher_logits[:, :-1, :].contiguous()
-        shift_labels = labels[:, :-1, :].contiguous()
+        shift_labels = labels[:, 1:].contiguous()
 
         # CELoss 계산
         ce = F.cross_entropy(

@@ -19,6 +19,15 @@ conda activate aimers
 cd /data/$USER/repos/aimers/Aimers
 
 # 3. 실행
-python test.py
+cd model
+python3 main.py \
+  --quant_method gptq \
+  --do_kd \
+  --search_budget 6 \
+  --eval_dataset_id LGAI-EXAONE/MANTA-1M \
+  --eval_dataset_split train \
+  --eval_start 200000 \
+  --eval_count 128 \
+  --out_dir ./artifacts
 
 exit 0

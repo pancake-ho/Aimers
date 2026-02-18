@@ -14,7 +14,7 @@ def load_model(model_id):
     
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
-        dtype=torch.bfloat16,
+        torch_dtype=torch.bfloat16,
         trust_remote_code=True,
         device_map={"": "cuda"}
     )

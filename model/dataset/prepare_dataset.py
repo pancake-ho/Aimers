@@ -37,7 +37,7 @@ def make_calib_dataset(tokenizer, dataset_id, split, n, seed=42):
     
     except Exception as e:
         print("스트리밍 경로가 실패하여 직접적으로 데이터셋을 로딩합니다.")
-        print("\n구체적인 원인은 다음을 참고하세요: {e}")
+        print(f"\n구체적인 원인은 다음을 참고하세요: {e}")
         
         ds = load_dataset(dataset_id, split=f"{split}[:{n}]")
 

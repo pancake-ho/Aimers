@@ -7,7 +7,7 @@ from dataclasses import dataclass
 @dataclass
 class ModelConfig:
     MODEL_ID = "LGAI-EXAONE/EXAONE-4.0-1.2B"
-    OUT_DIR = "./model"
+    OUT_DIR = "./artifacts"
     DATASET_ID = "LGAI-EXAONE/MANTA-1M"
     DATASET_SPLIT = "train"
 
@@ -18,5 +18,6 @@ class TuningConfig:
 
 @dataclass
 class QuantizationConfig:
+    METHOD = "gptq"  # gptq | autoround
     NUM_CALIBRATION_SAMPLES = 512
     MAX_SEQUENCE_LENGTH = 2048
