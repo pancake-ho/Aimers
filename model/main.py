@@ -17,8 +17,8 @@ from llmcompressor import oneshot
 from llmcompressor.modifiers.quantization import GPTQModifier
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
 
-from dataset import make_calib_dataset, prepare_dataset
-from quantizing import AutoRoundQuantizer
+from dataset.prepare_dataset import build_mixed_train_dataset, make_calib_dataset, prepare_dataset
+# from quantizing import AutoRoundQuantizer
 from tuning import KDTrainer, DataCollatorForCausalLM, Fine_tuning, build_kd_features
 from utils import save
 
@@ -32,6 +32,22 @@ def parse_args():
     parser.add_argument("--dataset_id", type=str, default="LGAI-EXAONE/MANTA-1M")
     parser.add_argument("--dataset_split", type=str, default="train")
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--use_external_mix", action="store_true")
+    parser.add_argument(
+        "--mix_dataset_ids",
+        type=str,
+        default="MyeongHo0621/korean-quality-cleaned,m-a-p/Code-Feedback",
+    )
+    parser.add_argument("--mix_dataset_splits", type=str, default="train,train")
+    parser.add_argument("--mix_dataset_configs", type=str, default=",all")
+    parser.add_argument("--mix_weights", type=str, default="0.60,0.25,0.15")
+    parser.add_argument(
+        "--mix_turn_policy",
+        type=str,
+        choices=["last_assistant", "keep_full", "two_turn"],
+        default="last_assistant",
+    )
+    parser.add_argument("--mix_apply_stages", type=str, default="kd,lora")
 
     parser.add_argument("--do_kd", action="store_true")
     parser.add_argument("--kd_out", type=str, default="./artifacts/kd")
@@ -142,6 +158,33 @@ def runtime_torch_dtype() -> torch.dtype:
 
 def use_bf16_training() -> bool:
     return bool(torch.cuda.is_available() and torch.cuda.is_bf16_supported())
+
+
+def _parse_stage_set(raw: str) -> set:
+    return {s.strip().lower() for s in str(raw).split(",") if s.strip()}
+
+
+def should_apply_external_mix(args, stage: str) -> bool:
+    if not bool(args.use_external_mix):
+        return False
+    stages = _parse_stage_set(args.mix_apply_stages)
+    return stage.strip().lower() in stages
+
+
+def _extract_mix_metric_params(mix_meta: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    if not mix_meta:
+        return {}
+    return {
+        "mix_applied": bool(mix_meta.get("mix_applied", False)),
+        "mix_stage": mix_meta.get("stage"),
+        "mix_target_count": mix_meta.get("target_count"),
+        "mix_actual_count": mix_meta.get("actual_count"),
+        "mix_shortfall": mix_meta.get("shortfall"),
+        "mix_counts": mix_meta.get("mix_counts"),
+        "mix_weights": mix_meta.get("mix_weights"),
+        "mix_sources": mix_meta.get("mix_sources"),
+        "mix_turn_policy": mix_meta.get("mix_turn_policy"),
+    }
 
 
 def _score_lower_is_better(value: Optional[float]) -> float:
@@ -344,6 +387,13 @@ def write_metric_reports(
         "selection_metric": args.selection_metric,
         "score_perf_weight": args.score_perf_weight,
         "score_speed_weight": args.score_speed_weight,
+        "use_external_mix": bool(args.use_external_mix),
+        "mix_dataset_ids": args.mix_dataset_ids,
+        "mix_dataset_splits": args.mix_dataset_splits,
+        "mix_dataset_configs": args.mix_dataset_configs,
+        "mix_weights": args.mix_weights,
+        "mix_turn_policy": args.mix_turn_policy,
+        "mix_apply_stages": args.mix_apply_stages,
         "metrics_csv": str(csv_path),
         "metrics_jsonl": str(jsonl_path),
         "model_dir": str(model_dir),
@@ -476,9 +526,18 @@ def save_model_checkpoint(model, tokenizer, out_dir: str):
 # ----------------------------
 # KD stage
 # ----------------------------
-def build_kd_train_dataset(args, tokenizer) -> Dataset:
-    raw = load_dataset(args.dataset_id, split=args.dataset_split)
-    raw = raw.shuffle(seed=args.seed).select(range(min(args.kd_samples, len(raw))))
+def build_kd_train_dataset(args, tokenizer) -> Tuple[Dataset, Dict[str, Any]]:
+    mix_meta: Dict[str, Any] = {}
+    if should_apply_external_mix(args, "kd"):
+        raw, mix_meta = build_mixed_train_dataset(
+            args=args,
+            target_count=args.kd_samples,
+            stage="kd",
+            seed=args.seed,
+        )
+    else:
+        raw = load_dataset(args.dataset_id, split=args.dataset_split)
+        raw = raw.shuffle(seed=args.seed).select(range(min(args.kd_samples, len(raw))))
 
     def _map(ex):
         feat = build_kd_features(tokenizer, ex, args.kd_max_len)
@@ -488,7 +547,11 @@ def build_kd_train_dataset(args, tokenizer) -> Dataset:
 
     train_ds = raw.map(_map, remove_columns=raw.column_names)
     train_ds = train_ds.filter(lambda x: len(x["input_ids"]) > 0)
-    return train_ds
+    if mix_meta:
+        mix_meta = dict(mix_meta)
+        mix_meta["raw_count"] = int(len(raw))
+        mix_meta["usable_count"] = int(len(train_ds))
+    return train_ds, mix_meta
 
 
 def _clamp(v: float, lo: float, hi: float) -> float:
@@ -605,7 +668,7 @@ def run_kd_if_enabled(
     if not args.do_kd:
         return args.base_model
 
-    train_ds = build_kd_train_dataset(args, tokenizer)
+    train_ds, kd_mix_meta = build_kd_train_dataset(args, tokenizer)
     trials = build_kd_trials(args)
 
     best_path = None
@@ -627,6 +690,8 @@ def run_kd_if_enabled(
         note = f"temp={temp}, alpha={alpha}, steps={steps}, select={selection_rule}"
         if lb_proxy_score is not None:
             note += f", proxy={lb_proxy_score:.6f}"
+        if kd_mix_meta.get("mix_applied"):
+            note += ", mix=on"
 
         append_metric(
             metrics,
@@ -642,6 +707,7 @@ def run_kd_if_enabled(
                 "steps": steps,
                 "selection_rule": selection_rule,
                 "lb_proxy_score": lb_proxy_score,
+                **_extract_mix_metric_params(kd_mix_meta),
                 **lb_proxy_details,
             },
         )
@@ -671,7 +737,22 @@ def run_lora_if_enabled(args, tokenizer, model_path: str, metrics: List[StageMet
         device_map="auto",
     )
 
-    train_ds, _ = prepare_dataset(args.dataset_id, args.dataset_split, args.lora_samples, 0)
+    lora_mix_meta: Dict[str, Any] = {}
+    if should_apply_external_mix(args, "lora"):
+        train_ds, lora_mix_meta = build_mixed_train_dataset(
+            args=args,
+            target_count=args.lora_samples,
+            stage="lora",
+            seed=args.seed + 101,
+        )
+    else:
+        train_ds, _ = prepare_dataset(
+            args.dataset_id,
+            args.dataset_split,
+            args.lora_samples,
+            0,
+            seed=args.seed,
+        )
     tuner = Fine_tuning(
         model=model,
         tokenizer=tokenizer,
@@ -694,6 +775,10 @@ def run_lora_if_enabled(args, tokenizer, model_path: str, metrics: List[StageMet
     if not args.skip_eval:
         ppl, tps = evaluate_model(tuned_model, tokenizer, eval_texts, args.eval_max_len)
 
+    note = f"samples={args.lora_samples}, r={args.lora_r}"
+    if lora_mix_meta.get("mix_applied"):
+        note += ", mix=on"
+
     append_metric(
         metrics,
         stage="lora",
@@ -701,8 +786,12 @@ def run_lora_if_enabled(args, tokenizer, model_path: str, metrics: List[StageMet
         perplexity=ppl,
         tokens_per_sec=tps,
         model_size_mb=estimate_model_size_mb(tuned_model),
-        notes=f"samples={args.lora_samples}, r={args.lora_r}",
-        params={"samples": args.lora_samples, "r": args.lora_r},
+        notes=note,
+        params={
+            "samples": args.lora_samples,
+            "r": args.lora_r,
+            **_extract_mix_metric_params(lora_mix_meta),
+        },
     )
 
     del tuned_model
