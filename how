@@ -1,0 +1,188 @@
+[33mcommit 1c580f8fa818e6c9461c9da0c3584d3af9891c07[m[33m ([m[1;36mHEAD -> [m[1;32mfeat/autoround-based-algorithm[m[33m)[m
+Author: mgga315 <mgga315@khu.ac.kr>
+Date:   Wed Feb 18 14:21:56 2026 +0900
+
+    auto-qlora
+
+[33mcommit bb6a6bf6bd5327ef262510c354ee76993921f7e0[m
+Author: mgga315 <mgga315@khu.ac.kr>
+Date:   Tue Feb 10 16:59:01 2026 +0900
+
+    job.sh
+
+[33mcommit 940698baa799f7749df959dc6745e9629b121705[m
+Author: mgga315 <mgga315@khu.ac.kr>
+Date:   Tue Feb 10 15:40:08 2026 +0900
+
+    feat: 서버 실행을 위한 job 스크립트 추가
+
+[33mcommit 9ab649e3c3cda44cb324f0a796a7f697a9d9e8f4[m[33m ([m[1;31morigin/feat/autoround-based-algorithm[m[33m)[m
+Author: Jeon seong ho <surt321@khu.ac.kr>
+Date:   Tue Feb 10 13:57:28 2026 +0900
+
+    Clarify usage instructions for running the pipeline
+    
+    Update usage instructions in README.md for clarity.
+
+[33mcommit 3c717805a3c3381b208b5f604e7fb1fff73a266e[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Tue Feb 10 13:55:22 2026 +0900
+
+    feat: argparse 추가 구현 및 파일 로드 경로 수정
+
+[33mcommit 5e7694ed0a510896b6e9f1c8dfca9a4187a812c5[m
+Merge: dba0472 712b91c
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Sun Feb 8 22:07:24 2026 +0900
+
+    Merge branch 'feat/autoround-based-algorithm' of https://github.com/pancake-ho/Aimers into feat/autoround-based-algorithm
+
+[33mcommit dba0472fe8d521a973b8283fe879f48b23e33027[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Sun Feb 8 22:02:14 2026 +0900
+
+    feat: 데이터셋 로드 함수에서, 데이터 shuffle 기능 추가 구현
+
+[33mcommit 712b91cbb26c6c1391390ac7ff200487f4d989f3[m
+Author: Jeon seong ho <surt321@khu.ac.kr>
+Date:   Sun Feb 8 21:40:42 2026 +0900
+
+    Refine Korean descriptions in README.md
+    
+    Updated Korean text for clarity and consistency.
+
+[33mcommit 8a970e58875c269b2bb8a2e3dffc24a0adc91f2b[m
+Author: Jeon seong ho <surt321@khu.ac.kr>
+Date:   Sun Feb 8 21:38:50 2026 +0900
+
+    Update README.md
+
+[33mcommit 4ddb4c01f4dfcc4b85191a56e24c558a0969d3bf[m
+Author: Jeon seong ho <surt321@khu.ac.kr>
+Date:   Sun Feb 8 21:37:33 2026 +0900
+
+    Refine README formatting and content
+    
+    Updated the README to improve clarity and formatting.
+
+[33mcommit 288b951a436b591fc019d27836d1d690b6a031ab[m
+Author: Jeon seong ho <surt321@khu.ac.kr>
+Date:   Sun Feb 8 21:36:00 2026 +0900
+
+    Add README for Aimers project on model optimization
+    
+    This README provides an overview of the Aimers project, detailing the optimization of the EXAONE 4.0 1.2B model using AutoRound and LoRA techniques. It includes project structure, requirements, usage instructions, and methodology details.
+
+[33mcommit a87376669ad667fe96fe75ff616d334be97cc809[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Sat Feb 7 23:37:31 2026 +0900
+
+    fix: .gitignore 규칙 재적용
+
+[33mcommit be5a9f06e35c2d11ba7e36b9bdf24f15f806b63d[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Sat Feb 7 23:33:59 2026 +0900
+
+    feat: autoround 및 LoRA 파인튜닝 기반 경량화 작업 전체 구현
+
+[33mcommit 7c9c5f485bef2c176196d495fd9a807a590086c5[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Sat Feb 7 16:48:07 2026 +0900
+
+    feat: AutoRound 양자화 클래스 구현
+
+[33mcommit c47db2183d71353d1a3584ba9a7e4ad8b234ddae[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Sat Feb 7 16:30:46 2026 +0900
+
+    fix: 대용량 모델 폴더 제외하고 다시 커밋
+
+[33mcommit 4fb72cd8819e95f37b6b41b3661548cda4337ba9[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Mon Feb 2 19:54:58 2026 +0900
+
+    feat: GPTQ 기반 해커톤 baseline 코드 구축 완료
+
+[33mcommit 7b35c8db21377f29317a09232fd0a864fd1827ed[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Sat Jan 31 19:52:42 2026 +0900
+
+    fix: 학습 실패 버그 수정 및 학습 과정 고도화 구현
+
+[33mcommit 37549a2e07bb6396d9b286789737b29c56631a8c[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Fri Jan 30 02:27:54 2026 +0900
+
+    feat: vLLM 구동 및 성능을 검증하는 기능 구현
+
+[33mcommit e5a29192f7da4b65cbdd369d4a1599e549399dec[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Fri Jan 30 02:16:59 2026 +0900
+
+    refactor: RL Alpha 이용해 양자화되는 모델 이름에 현 시간 붙이는 로직 추가
+
+[33mcommit 9f4c9433132d64420e0ced9fe2da7c0f8cc7cd4d[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Fri Jan 30 02:06:19 2026 +0900
+
+    feat: RL Alpha 값을 이용해 실제 양자화 과정을 수행하는 기능 구현
+
+[33mcommit 43c608b45fddcb8a2c2fc6ad9ee0b2574b94c640[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Fri Jan 30 01:32:24 2026 +0900
+
+    feat: 학습된 모델을 이용하여 alpha 값을 추출하는 inference 기능 구현
+
+[33mcommit 753ea6e1971730d9b8bb0fff991e1f546f9581c9[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Thu Jan 29 21:57:18 2026 +0900
+
+    feat: AWQ-PPO 모델 학습 기능 구현
+
+[33mcommit e18759a8f8de2177597734753d759085e53c8099[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Thu Jan 29 21:38:35 2026 +0900
+
+    feat: AWQ 전처리 (토크나이징, Forward/Inference) 기능 구현
+
+[33mcommit e66d67a44e732db187b3ea3d170f40ece452ac14[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Thu Jan 29 20:25:44 2026 +0900
+
+    refactor: AWQ activation 테스트 코드 CUDA, CPU 에 따라 로직 개선
+
+[33mcommit 62a8d5c1c15bb3aa9b73122854ee8c09fe1e1006[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Thu Jan 29 20:07:51 2026 +0900
+
+    test: EXAONE 4.0-1.2B 모델에 대한 AWQ Activation 테스트 기능 구현
+
+[33mcommit fc526c0d64be96cfedc26ebe663612935d084113[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Thu Jan 29 02:45:12 2026 +0900
+
+    feat: env 에 Activation 분포 관찰 기능 추가 구현
+
+[33mcommit 8f7e59963a84722d4967c61037214a4f6a846308[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Thu Jan 29 02:18:03 2026 +0900
+
+    Feat: Activation 분포 관찰 클래스 구현
+
+[33mcommit 26e328f801e28fdca709d72ddb626cd2010afe0a[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Wed Jan 28 18:37:45 2026 +0900
+
+    Feat: RL 기반 AWQ 파라미터 탐색 env 구현
+
+[33mcommit b7188a0bbd58fbdbfa03997fa475e6e6581f795f[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Mon Jan 26 03:25:31 2026 +0900
+
+    feat: 해커톤 스켈레톤 구조 구현 및 RL 기반 AWQ 파라미터 탐색 기능 구현
+
+[33mcommit 65e8f29867bc29fbebf4cd1c6e81b2fd647813c8[m
+Author: seongho Jeon <surt321@khu.ac.kr>
+Date:   Sat Jan 24 19:46:20 2026 +0900
+
+    Initial commit: Aimers 프로젝트 초기 세팅
