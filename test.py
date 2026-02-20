@@ -32,6 +32,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+REPO_ROOT = Path(__file__).resolve().parent
+MODEL_ROOT = REPO_ROOT / "model"
+if str(MODEL_ROOT) not in sys.path:
+    sys.path.insert(0, str(MODEL_ROOT))
+
+from utils import load_tokenizer
+
 
 # ---------------------------
 # Pretty printing helpers
@@ -263,16 +270,10 @@ def load_and_sanity_check_config(model_dir: Path) -> Dict:
 def tokenizer_chat_template_check(model_dir: Path) -> None:
     h1("토크나이저 로드 + apply_chat_template 체크(중요)")
     try:
-        from transformers import AutoTokenizer
-    except Exception as e:
-        raise RuntimeError(f"transformers import 실패: {e}")
-
-    try:
-        tok = AutoTokenizer.from_pretrained(
+        tok = load_tokenizer(
             str(model_dir),
             trust_remote_code=True,
             local_files_only=True,
-            use_fast=True,
         )
         ok("AutoTokenizer 로드 성공 (오프라인)")
     except Exception as e:
