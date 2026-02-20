@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 __all__ = ["AutoRoundQuantizer", "GPTQquantize"]
 
 if TYPE_CHECKING:
-    from .quantize import AutoRoundQuantizer, GPTQquantize
+    from .quantize import GPTQquantize
 
 
 def __getattr__(name: str):
@@ -23,7 +23,6 @@ def __getattr__(name: str):
                 "AutoRound utilities require optional dependency 'auto_round'."
             ) from exc
         return {
-            "AutoRoundQuantizer": AutoRoundQuantizer,
             "GPTQquantize": GPTQquantize,
         }[name]
     raise AttributeError(f"module 'quantizing' has no attribute '{name}'")
