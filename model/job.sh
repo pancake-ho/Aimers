@@ -20,26 +20,14 @@ cd /data/$USER/repos/aimers/model
 python main.py \
   --base_model LGAI-EXAONE/EXAONE-4.0-1.2B \
   --out_dir ./artifacts \
-  --quant_method "$QUANT" \
-  --do_kd \
-  --do_lora \
-  --search_budget 1 \
-  --disable_kd_grid \
-  --disable_quant_grid \
-  --selection_metric lb_proxy \
-  --score_perf_weight 0.5 \
-  --score_speed_weight 0.5 \
-  --eval_dataset_id LGAI-EXAONE/MANTA-1M \
-  --eval_dataset_split train \
-  --eval_start 200000 \
-  --eval_count 128 \
-  --strict_rehearsal \
-  --rehearsal_mode full \
-  --report_path metrics.csv \
-  --use_external_mix \
-  --mix_dataset_ids MyeongHo0621/korean-quality-cleaned,m-a-p/Code-Feedback \
-  --mix_dataset_splits train,train \
-  --mix_dataset_configs "$MIX_CONFIGS" \
-  --mix_weights 0.60,0.25,0.15
+  --quant_method gptq \
+  --do_kd --do_lora \
+  --quant_small_grid \
+  --quant_two_stage_eval \
+  --quant_proxy_eval_count 32 \
+  --quant_two_stage_top_k 2 \
+  --skip_rehearsal \
+  --skip_smoke
+
 
 exit 0
