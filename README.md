@@ -1,3 +1,27 @@
+# Aimers 8th — Final Static FP8 W8A8
+
+This repository contains the final static FP8 W8A8 quantization
+implementation for EXAONE 4.0 1.2B.
+
+The final method applies FP8 quantization to both weights and
+input activations using mixed calibration data, including
+Spanish-language samples.
+
+## Final Implementation
+
+- **Quantization:** `model/baseline_lm_w8a8_spanish.py`
+- **Evaluation:** `model/test_speed.py`
+- **Slurm:** `scripts/seraph_w8a8_spanish.sbatch`
+- **Documentation:** [W8A8 Final](docs/W8A8_FINAL.md)
+
+The final model weights and submission ZIP are stored
+separately from this Git repository.
+
+**Note:** The AutoRound pipeline described below is the
+historical implementation, not the final W8A8 method.
+
+---
+
 # Aimers 8th: EXAONE 4.0 1.2B Model Optimization
 
 
